@@ -1,0 +1,5 @@
+DB will need
+
+1. USERID -- make it a serial 
+
+2. USERNAME -- read a prompt
