@@ -4,12 +4,13 @@ PSQL="psql --username=freecodecamp --dbname=number_game -t --no-align -c"
 
 # user login
 LOGIN() {
-    read -p "Enter your username:" USERNAME
+    echo -e "\nEnter your username:"
+    read USERNAME
     # check if username exists in DB
     USER_ID=$($PSQL "SELECT user_id FROM user_info WHERE username ILIKE '$USERNAME'")
     if [[ -z $USER_ID ]]; then
         #register new user
-        echo -e "\nWelcome, $USERNAME! It looks like this is your first time here."
+        echo -e "\nWelcome, $(echo $USERNAME | sed -E 's/^ *| *$//g')! It looks like this is your first time here."
         #insert new user
         INSERT_NEW_USER=$($PSQL "INSERT INTO user_info (username, games_played, best_game) VALUES ('$USERNAME', 0, 0)")
         #start game
@@ -18,7 +19,7 @@ LOGIN() {
     else
         GET_USER_INFO=$($PSQL "SELECT games_played, best_game FROM user_info WHERE username ILIKE '$USERNAME'")
         echo $GET_USER_INFO | while IFS=\| read GAMES_PLAYED BEST_GAME; do
-            echo -e "\nWelcome back, '$USERNAME'! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
+            echo -e "\nWelcome back, $(echo $USERNAME | sed -E 's/^ *| *$//g')! You have played $(echo $GAMES_PLAYED | sed -E 's/^ *| *$//g') games, and your best game took $(echo $BEST_GAME | sed -E 's/^ *| *$//g') guesses."
         done
         NUMBER_GAME "$USER_ID" "$USERNAME" "$GAMES_PLAYED" "$BEST_GAME"
     fi
@@ -34,8 +35,6 @@ NUMBER_GAME() {
     # SET ANSWER
     ANSWER=$(($RANDOM % 1000 + 1))
 
-    # REMOVE ME!
-    echo $ANSWER
     #PROMPT
     echo -e "\nGuess the secret number between 1 and 1000:"
     while true; do
@@ -56,7 +55,7 @@ NUMBER_GAME() {
                 continue
             fi
         else
-            echo -e "\nYou guessed it in $GUESSES tries. The secret number was $ANSWER. Nice job!"
+            echo -e "\nYou guessed it in $(echo $GUESSES | sed -E 's/^ *| *$//g') tries. The secret number was $ANSWER. Nice job!"
             INSERT_GAME_RESULT=$($PSQL "INSERT INTO games (user_id, guess_num) VALUES ($USER_ID, $GUESSES)")
             #update game played count
             UPDATE_GAME_NUM=$($PSQL "UPDATE user_info SET games_played = games_played+1 WHERE username='$USERNAME'")
