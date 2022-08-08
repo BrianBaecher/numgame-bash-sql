@@ -1,2 +1,2 @@
 # bash-sql-number-game
-# numgame-bash-sql
+Guess the number...
